@@ -90,6 +90,51 @@ Use the `HISTCONTROL` environment variable to avoid storing the password in your
     $  export AZURE_DEFAULT_PASSWORD=mypassword
     $ aws-azure-login
 
+#### Account ID Mapping (WIP)
+
+After you've completed configuration, the profile you have selected and the attributes will be written to your [AWS configuration options file](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) (generally ~/.aws/config).  You are able to add simple account ID to name mappings in this file so that if you need to select a role from many accounts, it will look less like this:
+
+````
+? Role: 
+❯ arn:aws:iam::835239561935:role/FullAccessAdmin
+  arn:aws:iam::124212453255:role/MainRole
+  arn:aws:iam::093572511235:role/PowerUser
+  arn:aws:iam::337563617236:role/NetworkReadOnly
+  arn:aws:iam::446353358356:role/ReadOnly
+  arn:aws:iam::446353358356:role/FullAccessAdmin
+````
+
+And more like this (also sorted - thanks to @samjeffress):
+
+````
+? Role: 
+❯ Billing:role/MainRole
+  ContainerClusterProd:role/PowerUser
+  ContainerClusterStage:role/NetworkReadOnly
+  DevSandbox:role/FullAccessAdmin
+  DevSandbox:role/ReadOnly
+  NetworkingAccount:role/FullAccessAdmin
+````
+
+To add mappings, open your AWS configuration options file (generally ~/.aws/config) and add mappings in like so:
+
+````
+[default]
+region=us-west-2
+azure_tenant_id=00000000-1111-2222-3333-444444444444
+azure_app_id_uri=https://signin.aws.amazon.com/saml
+azure_default_username=myemail@gmail.com
+azure_default_role_arn=arn:aws:iam::093572511235:role/PowerUser
+azure_default_duration_hours=12
+map_835239561935=NetworkingAccount
+map_124212453255=Billing
+map_093572511235=ContainerClusterProd
+map_337563617236=ContainerClusterStage
+map_446353358356=DevSandbox
+````
+
+You are not required to fill in a mapping for every account, if there are no mappings, extra mappings, or missing mappings - the system will simply show the full ARN instead.
+
 ### Logging In
 
 Once aws-azure-login is configured, you can log in. For the default profile, just run:
